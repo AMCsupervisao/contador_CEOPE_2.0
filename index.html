@@ -2,906 +2,1084 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador Múltiplo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contador de Blitz — AMC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
-            --primary-color: #2196F3;
-            --primary-dark: #0b7dda;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --warning-color: #FF9800;
-            --background: #f5f5f5;
-            --surface: white;
-            --text: #333;
-            --text-secondary: #777;
-            --border: #ddd;
+            --pr: #1565C0;
+            --pr2: #0D47A1;
+            --ac: #FFC107;
+            --ac2: #FF8F00;
+            --vd: #2E7D32;
+            --vd2: #1B5E20;
+            --vm: #C62828;
+            --vm2: #B71C1C;
+            --bg: #0F1923;
+            --bg2: #162330;
+            --card: #1E2E3D;
+            --card2: #243647;
+            --borda: #2A3F52;
+            --txt: #E8EEF3;
+            --txt2: #8FA6B8;
+            --ft: 'Barlow Condensed', sans-serif;
+            --fb: 'Barlow', sans-serif;
         }
-        
-        [data-theme="dark"] {
-            --primary-color: #64B5F6;
-            --primary-dark: #42A5F5;
-            --success-color: #81C784;
-            --danger-color: #E57373;
-            --warning-color: #FFB74D;
-            --background: #121212;
-            --surface: #1e1e1e;
-            --text: #ffffff;
-            --text-secondary: #bbbbbb;
-            --border: #333;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            background-color: var(--background);
-            color: var(--text);
-            padding: 10px;
+            font-family: var(--fb);
+            background: var(--bg);
+            color: var(--txt);
             min-height: 100vh;
-            transition: all 0.3s ease;
+            padding-bottom: 30px;
         }
-        
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            background: var(--surface);
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, var(--pr2) 0%, var(--pr) 100%);
+            padding: 18px 16px 14px;
+            position: relative;
             overflow: hidden;
         }
-        
-        header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            position: relative;
-        }
-        
-        .theme-toggle {
+        .header::after {
+            content: '';
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255,255,255,0.2);
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--ac) 0%, var(--ac2) 100%);
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-back {
+            width: 38px; height: 38px;
+            background: rgba(255,255,255,.15);
             border: none;
-            color: white;
-            padding: 8px;
             border-radius: 50%;
-            cursor: pointer;
+            color: #fff;
             font-size: 18px;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-toggle:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-        
-        h1 {
-            margin-bottom: 5px;
-            font-size: 1.8rem;
-        }
-        
-        .subtitle {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-        
-        .section {
-            padding: 20px;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .section-title {
-            font-size: 1.2rem;
-            color: var(--text);
-        }
-        
-        .input-group {
-            display: flex;
-            margin-bottom: 15px;
-            gap: 5px;
-        }
-        
-        input[type="text"] {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 16px;
-            background: var(--surface);
-            color: var(--text);
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-        
-        .btn {
-            padding: 15px 20px;
-            border: none;
-            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: var(--warning-color);
-            color: white;
-        }
-        
-        .btn-small {
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-        
-        .group-item {
-            background: var(--surface);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: 2px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .group-item:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-        
-        .counter-item {
-            background: var(--surface);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 15px;
-            border: 2px solid var(--border);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .counter-item:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-        
-        .counter-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--text);
-        }
-        
-        .counter-display {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin: 15px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .counter-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .btn-counter {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        
-        .btn-counter:hover {
-            transform: scale(1.1);
-        }
-        
-        .btn-counter:active {
-            transform: scale(0.95);
-        }
-        
-        .reset-btn {
-            background: var(--warning-color);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        
-        .tab-container {
-            background: var(--surface);
-            border-top: 2px solid var(--border);
-        }
-        
-        .tab-buttons {
-            display: flex;
-            background: var(--border);
-        }
-        
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            background: var(--surface);
-            border: none;
-            cursor: pointer;
-            color: var(--text);
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .tab-content {
-            padding: 20px;
             display: none;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background .2s;
         }
-        
-        .tab-content.active {
-            display: block;
+        .header-back.visible { display: flex; }
+        .header-back:active { background: rgba(255,255,255,.3); }
+        .header-titles { flex: 1; }
+        .header-tag {
+            font-family: var(--ft);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.6);
+            margin-bottom: 2px;
         }
-        
-        .history-item {
-            background: var(--surface);
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-            font-size: 14px;
+        .header h1 {
+            font-family: var(--ft);
+            font-size: clamp(20px, 5vw, 26px);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.1;
         }
-        
-        .history-time {
-            color: var(--text-secondary);
+        .header h1 span { color: var(--ac); }
+        .header-sub {
             font-size: 12px;
+            color: rgba(255,255,255,.65);
+            margin-top: 2px;
         }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-top: 15px;
+        .header-theme {
+            background: rgba(255,255,255,.15);
+            border: none;
+            color: #fff;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
         }
-        
-        .hidden {
-            display: none !important;
+
+        /* ===== PÁGINA GRUPOS ===== */
+        #paginaGrupos, #paginaContadores { padding: 16px; }
+        #paginaContadores { display: none; }
+
+        /* ONBOARDING */
+        .onboarding {
+            background: var(--card);
+            border: 1px solid var(--borda);
+            border-left: 4px solid var(--ac);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            font-size: 13.5px;
+            color: var(--txt2);
+            line-height: 1.6;
         }
-        
-        .empty-state {
+        .onboarding strong { color: var(--txt); }
+        .onboarding-titulo {
+            font-family: var(--ft);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ac);
+            margin-bottom: 6px;
+        }
+        .onboarding ol { margin-left: 18px; }
+        .onboarding li { margin: 4px 0; }
+
+        /* SEÇÃO TÍTULO */
+        .sec-titulo {
+            font-family: var(--ft);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--txt2);
+            margin-bottom: 10px;
+        }
+
+        /* INPUT CRIAR */
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .input-row input {
+            flex: 1;
+            background: var(--card);
+            border: 2px solid var(--borda);
+            border-radius: 10px;
+            padding: 13px 15px;
+            font-family: var(--fb);
+            font-size: 15px;
+            color: var(--txt);
+            transition: border-color .2s;
+            -webkit-appearance: none;
+        }
+        .input-row input::placeholder { color: var(--txt2); }
+        .input-row input:focus { outline: none; border-color: var(--pr); }
+        .btn-add {
+            width: 50px; height: 50px;
+            background: var(--pr);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background .2s, transform .1s;
+        }
+        .btn-add:active { background: var(--pr2); transform: scale(.95); }
+
+        /* LISTA GRUPOS */
+        .grupo-item {
+            background: var(--card);
+            border: 1px solid var(--borda);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: border-color .2s, transform .1s;
+            -webkit-user-select: none;
+        }
+        .grupo-item:active { transform: scale(.98); border-color: var(--pr); }
+        .grupo-icone {
+            width: 42px; height: 42px;
+            background: var(--pr);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .grupo-info { flex: 1; min-width: 0; }
+        .grupo-nome {
+            font-weight: 600;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .grupo-meta {
+            font-size: 12px;
+            color: var(--txt2);
+            margin-top: 2px;
+        }
+        .grupo-acoes { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn-abrir {
+            background: var(--pr);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 7px 14px;
+            font-family: var(--fb);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-excluir {
+            background: transparent;
+            color: var(--txt2);
+            border: 1px solid var(--borda);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-excluir:active { color: var(--vm); border-color: var(--vm); }
+
+        /* ESTADO VAZIO */
+        .vazio {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
+            padding: 32px 20px;
+            color: var(--txt2);
         }
-        
-        .export-buttons {
+        .vazio-icone { font-size: 36px; margin-bottom: 10px; }
+        .vazio-txt { font-size: 14px; }
+
+        /* ===== PÁGINA CONTADORES ===== */
+        .blitz-info {
+            background: var(--card);
+            border: 1px solid var(--borda);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .blitz-nome {
+            font-family: var(--ft);
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--ac);
+        }
+        .blitz-hora {
+            font-size: 12px;
+            color: var(--txt2);
+        }
+        .blitz-total {
+            text-align: right;
+        }
+        .blitz-total-num {
+            font-family: var(--ft);
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--txt);
+            line-height: 1;
+        }
+        .blitz-total-label {
+            font-size: 11px;
+            color: var(--txt2);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        /* CONTADOR CARD */
+        .contador-card {
+            background: var(--card);
+            border: 1px solid var(--borda);
+            border-radius: 14px;
+            padding: 20px 16px 16px;
+            margin-bottom: 12px;
+            transition: border-color .2s;
+        }
+        .contador-card:focus-within { border-color: var(--pr); }
+        .contador-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .contador-nome {
+            font-family: var(--ft);
+            font-size: 19px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+        .btn-del-contador {
+            background: transparent;
+            border: none;
+            color: var(--txt2);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+        }
+        .btn-del-contador:active { color: var(--vm); }
+        .contador-num {
+            font-family: var(--ft);
+            font-size: 72px;
+            font-weight: 900;
+            color: var(--ac);
+            text-align: center;
+            line-height: 1;
+            margin: 4px 0 16px;
+            text-shadow: 0 2px 20px rgba(255,193,7,.2);
+            transition: transform .1s;
+        }
+        .contador-num.bump {
+            transform: scale(1.15);
+        }
+        .contador-btns {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 15px;
         }
-        
-        .floating-back {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--primary-color);
-            color: white;
+        .btn-menos {
+            background: var(--vm);
             border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 20px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 32px;
+            font-weight: 900;
+            height: 64px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transition: all 0.3s ease;
+            transition: background .15s, transform .1s;
+            font-family: var(--ft);
         }
-        
-        .floating-back:hover {
-            transform: scale(1.1);
+        .btn-menos:active { background: var(--vm2); transform: scale(.96); }
+        .btn-mais {
+            background: var(--vd);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 32px;
+            font-weight: 900;
+            height: 64px;
+            cursor: pointer;
+            transition: background .15s, transform .1s;
+            font-family: var(--ft);
         }
+        .btn-mais:active { background: var(--vd2); transform: scale(.96); }
+        .btn-reiniciar {
+            grid-column: 1 / -1;
+            background: transparent;
+            border: 1px solid var(--borda);
+            border-radius: 8px;
+            color: var(--txt2);
+            font-family: var(--fb);
+            font-size: 13px;
+            font-weight: 600;
+            height: 36px;
+            cursor: pointer;
+            margin-top: 2px;
+            transition: border-color .2s, color .2s;
+        }
+        .btn-reiniciar:active { border-color: var(--ac); color: var(--ac); }
+
+        /* ===== ABAS ===== */
+        .abas {
+            background: var(--card);
+            border: 1px solid var(--borda);
+            border-radius: 12px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+        .abas-nav {
+            display: flex;
+            border-bottom: 1px solid var(--borda);
+        }
+        .aba-btn {
+            flex: 1;
+            padding: 13px 6px;
+            background: transparent;
+            border: none;
+            color: var(--txt2);
+            font-family: var(--fb);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color .2s, background .2s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        .aba-btn.ativa {
+            color: var(--ac);
+            border-bottom-color: var(--ac);
+        }
+        .aba-conteudo { padding: 16px; display: none; }
+        .aba-conteudo.ativa { display: block; }
+
+        /* COMPARTILHAR */
+        .share-titulo {
+            font-family: var(--ft);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--txt2);
+            margin-bottom: 12px;
+        }
+        .share-preview {
+            background: var(--bg2);
+            border: 1px solid var(--borda);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+            font-size: 13px;
+            color: var(--txt2);
+            white-space: pre-wrap;
+            font-family: monospace;
+            line-height: 1.6;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .share-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .btn-wpp {
+            background: #25D366;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 13px;
+            font-family: var(--fb);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background .2s;
+        }
+        .btn-wpp:active { background: #1ebe59; }
+        .btn-pdf {
+            background: var(--vm);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 13px;
+            font-family: var(--fb);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background .2s;
+        }
+        .btn-pdf:active { background: var(--vm2); }
+
+        /* HISTÓRICO */
+        .hist-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--borda);
+            font-size: 13.5px;
+        }
+        .hist-item:last-child { border-bottom: none; }
+        .hist-hora { font-size: 11.5px; color: var(--txt2); margin-top: 2px; }
+        .btn-limpar {
+            background: transparent;
+            border: 1px solid var(--borda);
+            color: var(--txt2);
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-family: var(--fb);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 14px;
+            width: 100%;
+        }
+
+        /* GRÁFICO */
+        .chart-wrap {
+            position: relative;
+            height: 220px;
+            margin-top: 8px;
+        }
+        .grafico-vazio {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--txt2);
+            font-size: 13.5px;
+        }
+
+        /* TEMA CLARO */
+        body.claro {
+            --bg: #F0F4F8;
+            --bg2: #E2EAF0;
+            --card: #FFFFFF;
+            --card2: #F5F8FC;
+            --borda: #D0DBE6;
+            --txt: #1A2B3C;
+            --txt2: #5A7A95;
+        }
+
+        /* ANIMAÇÃO ENTRADA */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anim { animation: fadeUp .25s ease forwards; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <button class="theme-toggle" id="themeToggle">🌙</button>
-            <h1>Contador Múltiplo</h1>
-            <p class="subtitle">Sistema avançado de contagem</p>
-        </header>
-        
-        <button class="floating-back hidden" id="backBtn">←</button>
-        
-        <!-- Seção de Grupos -->
-        <section class="section" id="groupSection">
-            <div class="section-header">
-                <h2 class="section-title">Gerenciar Grupos</h2>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-inner">
+        <button class="header-back" id="btnVoltar" onclick="voltarGrupos()">←</button>
+        <div class="header-titles">
+            <div class="header-tag">AMC Fortaleza</div>
+            <h1 id="headerTitulo">Contador de <span>Blitz</span></h1>
+            <div class="header-sub" id="headerSub">Contagem de veículos em campo</div>
+        </div>
+        <button class="header-theme" id="btnTema" onclick="toggleTema()" title="Alternar tema">🌙</button>
+    </div>
+</div>
+
+<!-- ===== PÁGINA GRUPOS ===== -->
+<div id="paginaGrupos">
+
+    <!-- ONBOARDING -->
+    <div class="onboarding">
+        <div class="onboarding-titulo">📋 Como usar</div>
+        <ol>
+            <li><strong>Crie uma blitz</strong> com um nome (ex: "Blitz Centro — 06/04", "Turno Manhã")</li>
+            <li><strong>Abra a blitz</strong> e crie contadores por tipo de veículo (ex: Motos, Carros, Caminhões)</li>
+            <li>Use os botões <strong>＋ e −</strong> para contar durante a operação</li>
+            <li><strong>Compartilhe</strong> o resultado via WhatsApp ou salve em PDF</li>
+        </ol>
+    </div>
+
+    <div class="sec-titulo">Blitz / Turnos</div>
+
+    <div class="input-row">
+        <input type="text" id="inputGrupo" placeholder="Ex: Blitz Centro — 04/04" maxlength="50">
+        <button class="btn-add" id="btnAddGrupo" onclick="criarGrupo()">+</button>
+    </div>
+
+    <div id="listaGrupos"></div>
+
+</div>
+
+<!-- ===== PÁGINA CONTADORES ===== -->
+<div id="paginaContadores">
+
+    <div class="blitz-info">
+        <div>
+            <div class="blitz-nome" id="blitzNome">—</div>
+            <div class="blitz-hora" id="blitzHora">—</div>
+        </div>
+        <div class="blitz-total">
+            <div class="blitz-total-num" id="totalGeral">0</div>
+            <div class="blitz-total-label">total</div>
+        </div>
+    </div>
+
+    <div class="sec-titulo">Tipos de Veículo</div>
+
+    <div class="input-row">
+        <input type="text" id="inputContador" placeholder="Ex: Motos, Carros, Caminhões…" maxlength="40">
+        <button class="btn-add" id="btnAddContador" onclick="criarContador()">+</button>
+    </div>
+
+    <div id="listaContadores"></div>
+
+    <!-- ABAS -->
+    <div class="abas" id="abas">
+        <div class="abas-nav">
+            <button class="aba-btn ativa" data-aba="compartilhar" onclick="mudarAba('compartilhar')">Compartilhar</button>
+            <button class="aba-btn" data-aba="historico" onclick="mudarAba('historico')">Histórico</button>
+            <button class="aba-btn" data-aba="grafico" onclick="mudarAba('grafico')">Gráfico</button>
+        </div>
+
+        <!-- ABA COMPARTILHAR -->
+        <div class="aba-conteudo ativa" id="abaCompartilhar">
+            <div class="share-titulo">Prévia da mensagem</div>
+            <div class="share-preview" id="sharePreview">—</div>
+            <div class="share-btns">
+                <button class="btn-wpp" onclick="enviarWhatsApp()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    WhatsApp
+                </button>
+                <button class="btn-pdf" onclick="gerarPDF()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    PDF
+                </button>
             </div>
-            <div class="input-group">
-                <input type="text" id="groupName" placeholder="Nome do grupo">
-                <button class="btn btn-primary" id="addGroup">+</button>
-            </div>
-            <div id="groupList"></div>
-        </section>
-        
-        <!-- Seção de Contadores -->
-        <section class="section hidden" id="counterSection">
-            <div class="section-header">
-                <h2 class="section-title">
-                    Grupo: <span id="currentGroup">Nenhum</span>
-                </h2>
-            </div>
-            <div class="input-group">
-                <input type="text" id="counterName" placeholder="Nome do contador">
-                <button class="btn btn-primary" id="addCounter">+</button>
-            </div>
-            <div id="counterList"></div>
-        </section>
-        
-        <!-- Abas de Funcionalidades -->
-        <div class="tab-container hidden" id="tabContainer">
-            <div class="tab-buttons">
-                <button class="tab-btn active" data-tab="export">Exportar</button>
-                <button class="tab-btn" data-tab="history">Histórico</button>
-                <button class="tab-btn" data-tab="charts">Gráficos</button>
-            </div>
-            
-            <div class="tab-content active" id="exportTab">
-                <h3>Exportar Dados</h3>
-                <div class="export-buttons">
-                    <button class="btn btn-success" id="exportExcel">Excel</button>
-                    <button class="btn btn-danger" id="exportPDF">PDF</button>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="historyTab">
-                <h3>Histórico de Ações</h3>
-                <div id="historyList"></div>
-                <button class="btn btn-warning" id="clearHistory">Limpar Histórico</button>
-            </div>
-            
-            <div class="tab-content" id="chartsTab">
-                <h3>Relatório Visual</h3>
-                <div class="chart-container">
-                    <canvas id="counterChart"></canvas>
-                </div>
+        </div>
+
+        <!-- ABA HISTÓRICO -->
+        <div class="aba-conteudo" id="abaHistorico">
+            <div id="listaHistorico"></div>
+            <button class="btn-limpar" onclick="limparHistorico()">Limpar histórico</button>
+        </div>
+
+        <!-- ABA GRÁFICO -->
+        <div class="aba-conteudo" id="abaGrafico">
+            <div class="chart-wrap">
+                <canvas id="grafico"></canvas>
             </div>
         </div>
     </div>
 
-    <script>
-        // Sistema de Logging
-        class Logger {
-            constructor() {
-                this.logs = JSON.parse(localStorage.getItem('counterLogs')) || [];
-            }
-            
-            log(action, details = {}) {
-                const logEntry = {
-                    id: Date.now(),
-                    timestamp: new Date(),
-                    action: action,
-                    details: details
-                };
-                
-                this.logs.unshift(logEntry);
-                
-                // Manter apenas os últimos 100 logs
-                if (this.logs.length > 100) {
-                    this.logs = this.logs.slice(0, 100);
-                }
-                
-                this.save();
-                this.updateHistoryDisplay();
-            }
-            
-            save() {
-                localStorage.setItem('counterLogs', JSON.stringify(this.logs));
-            }
-            
-            clear() {
-                this.logs = [];
-                this.save();
-                this.updateHistoryDisplay();
-            }
-            
-            updateHistoryDisplay() {
-                const historyList = document.getElementById('historyList');
-                if (!historyList) return;
-                
-                if (this.logs.length === 0) {
-                    historyList.innerHTML = '<div class="empty-state">Nenhuma ação registrada</div>';
-                    return;
-                }
-                
-                historyList.innerHTML = this.logs.map(log => `
-                    <div class="history-item">
-                        <div>${log.action}</div>
-                        <div class="history-time">${new Date(log.timestamp).toLocaleString()}</div>
-                    </div>
-                `).join('');
-            }
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // ===== ESTADO =====
+    let grupos = JSON.parse(localStorage.getItem('blitz_grupos') || '[]');
+    let grupoAtual = null;
+    let graficoObj = null;
+    let historico = JSON.parse(localStorage.getItem('blitz_hist') || '[]');
+    let temaClaro = localStorage.getItem('blitz_tema') === 'claro';
+
+    // ===== INIT =====
+    if (temaClaro) document.body.classList.add('claro');
+    document.getElementById('btnTema').textContent = temaClaro ? '🌙' : '☀️';
+
+    document.getElementById('inputGrupo').addEventListener('keypress', e => { if (e.key === 'Enter') criarGrupo(); });
+    document.getElementById('inputContador').addEventListener('keypress', e => { if (e.key === 'Enter') criarContador(); });
+
+    renderGrupos();
+    atualizarPreview();
+
+    // ===== TEMA =====
+    function toggleTema() {
+        temaClaro = !temaClaro;
+        document.body.classList.toggle('claro', temaClaro);
+        localStorage.setItem('blitz_tema', temaClaro ? 'claro' : 'escuro');
+        document.getElementById('btnTema').textContent = temaClaro ? '🌙' : '☀️';
+    }
+
+    // ===== GRUPOS =====
+    function criarGrupo() {
+        const inp = document.getElementById('inputGrupo');
+        const nome = inp.value.trim();
+        if (!nome) { inp.focus(); return; }
+        const g = { id: Date.now().toString(), nome, criado: new Date().toISOString(), contadores: [] };
+        grupos.push(g);
+        salvar();
+        inp.value = '';
+        renderGrupos();
+        log(`Blitz criada: ${nome}`);
+    }
+
+    function renderGrupos() {
+        const el = document.getElementById('listaGrupos');
+        if (!grupos.length) {
+            el.innerHTML = `<div class="vazio anim"><div class="vazio-icone">👩🏻‍✈️</div><div class="vazio-txt">Nenhuma blitz cadastrada.<br>Crie uma acima para começar.</div></div>`;
+            return;
         }
-
-        // Variáveis globais
-        let groups = JSON.parse(localStorage.getItem('counterGroups')) || [];
-        let currentGroupId = null;
-        let logger = new Logger();
-        let chart = null;
-
-        // Elementos DOM
-        const elements = {};
-
-        // Inicializar aplicativo
-        function initApp() {
-            // Aguardar elementos DOM estarem disponíveis
-            elements.themeToggle = document.getElementById('themeToggle');
-            elements.backBtn = document.getElementById('backBtn');
-            elements.groupSection = document.getElementById('groupSection');
-            elements.counterSection = document.getElementById('counterSection');
-            elements.tabContainer = document.getElementById('tabContainer');
-            elements.groupName = document.getElementById('groupName');
-            elements.addGroup = document.getElementById('addGroup');
-            elements.groupList = document.getElementById('groupList');
-            elements.currentGroup = document.getElementById('currentGroup');
-            elements.counterName = document.getElementById('counterName');
-            elements.addCounter = document.getElementById('addCounter');
-            elements.counterList = document.getElementById('counterList');
-            elements.exportExcel = document.getElementById('exportExcel');
-            elements.exportPDF = document.getElementById('exportPDF');
-            elements.clearHistory = document.getElementById('clearHistory');
-            
-            loadTheme();
-            renderGroups();
-            attachEventListeners();
-            logger.updateHistoryDisplay();
-            logger.log('Aplicativo iniciado');
-        }
-
-        // Tema escuro/claro
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            if (elements.themeToggle) {
-                elements.themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-            }
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            if (elements.themeToggle) {
-                elements.themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-            }
-            logger.log(`Tema alterado para ${newTheme}`);
-        }
-
-        // Renderizar grupos
-        function renderGroups() {
-            if (!elements.groupList) return;
-            
-            if (groups.length === 0) {
-                elements.groupList.innerHTML = '<div class="empty-state">Nenhum grupo criado ainda</div>';
-                return;
-            }
-            
-            elements.groupList.innerHTML = groups.map(group => `
-                <div class="group-item">
-                    <span>${group.name}</span>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-primary btn-small" onclick="selectGroup('${group.id}')">Abrir</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteGroup('${group.id}')">×</button>
-                    </div>
+        el.innerHTML = grupos.map(g => {
+            const total = g.contadores.reduce((s, c) => s + c.count, 0);
+            const qtd = g.contadores.length;
+            const data = new Date(g.criado).toLocaleDateString('pt-BR');
+            return `
+            <div class="grupo-item anim" onclick="abrirGrupo('${g.id}')">
+                <div class="grupo-icone">🚔</div>
+                <div class="grupo-info">
+                    <div class="grupo-nome">${g.nome}</div>
+                    <div class="grupo-meta">${data} · ${qtd} tipo${qtd !== 1 ? 's' : ''} · ${total} veículo${total !== 1 ? 's' : ''}</div>
                 </div>
-            `).join('');
-        }
-
-        // Renderizar contadores
-        function renderCounters() {
-            if (!elements.counterList) return;
-            
-            const group = groups.find(g => g.id === currentGroupId);
-            
-            if (!group || !group.counters || group.counters.length === 0) {
-                elements.counterList.innerHTML = '<div class="empty-state">Nenhum contador neste grupo</div>';
-                return;
-            }
-            
-            elements.counterList.innerHTML = group.counters.map(counter => `
-                <div class="counter-item">
-                    <div class="counter-name">${counter.name}</div>
-                    <div class="counter-display">${counter.count}</div>
-                    <div class="counter-controls">
-                        <button class="btn-counter btn-danger" onclick="decrementCounter('${counter.id}')">-</button>
-                        <button class="btn-counter btn-success" onclick="incrementCounter('${counter.id}')">+</button>
-                    </div>
-                    <button class="btn btn-warning reset-btn" onclick="resetCounter('${counter.id}')">Reiniciar</button>
+                <div class="grupo-acoes">
+                    <button class="btn-abrir" onclick="event.stopPropagation();abrirGrupo('${g.id}')">Abrir</button>
+                    <button class="btn-excluir" onclick="event.stopPropagation();excluirGrupo('${g.id}')">×</button>
                 </div>
-            `).join('');
-        }
+            </div>`;
+        }).join('');
+    }
 
-        // Event listeners
-        function attachEventListeners() {
-            if (elements.themeToggle) elements.themeToggle.addEventListener('click', toggleTheme);
-            if (elements.backBtn) elements.backBtn.addEventListener('click', goBack);
-            if (elements.addGroup) elements.addGroup.addEventListener('click', addGroup);
-            if (elements.addCounter) elements.addCounter.addEventListener('click', addCounter);
-            if (elements.exportExcel) elements.exportExcel.addEventListener('click', () => exportData('excel'));
-            if (elements.exportPDF) elements.exportPDF.addEventListener('click', () => exportData('pdf'));
-            if (elements.clearHistory) elements.clearHistory.addEventListener('click', () => {
-                if (confirm('Limpar todo o histórico?')) {
-                    logger.clear();
+    function excluirGrupo(id) {
+        const g = grupos.find(x => x.id === id);
+        if (!confirm(`Excluir a blitz "${g.nome}"? Todos os contadores serão perdidos.`)) return;
+        grupos = grupos.filter(x => x.id !== id);
+        salvar();
+        renderGrupos();
+        log(`Blitz excluída: ${g.nome}`);
+    }
+
+    function abrirGrupo(id) {
+        grupoAtual = grupos.find(g => g.id === id);
+        document.getElementById('paginaGrupos').style.display = 'none';
+        document.getElementById('paginaContadores').style.display = 'block';
+        document.getElementById('btnVoltar').classList.add('visible');
+        document.getElementById('headerTitulo').innerHTML = grupoAtual.nome;
+        document.getElementById('headerSub').textContent = 'Contadores ativos';
+        document.getElementById('blitzNome').textContent = grupoAtual.nome;
+        document.getElementById('blitzHora').textContent = 'Iniciada em ' + new Date(grupoAtual.criado).toLocaleString('pt-BR');
+        renderContadores();
+        atualizarTotal();
+        atualizarPreview();
+        log(`Blitz aberta: ${grupoAtual.nome}`);
+    }
+
+    function voltarGrupos() {
+        document.getElementById('paginaGrupos').style.display = 'block';
+        document.getElementById('paginaContadores').style.display = 'none';
+        document.getElementById('btnVoltar').classList.remove('visible');
+        document.getElementById('headerTitulo').innerHTML = 'Contador de <span style="color:var(--ac)">Blitz</span>';
+        document.getElementById('headerSub').textContent = 'Contagem de veículos em campo';
+        grupoAtual = null;
+        renderGrupos();
+    }
+
+    // ===== CONTADORES =====
+    function criarContador() {
+        if (!grupoAtual) return;
+        const inp = document.getElementById('inputContador');
+        const nome = inp.value.trim();
+        if (!nome) { inp.focus(); return; }
+        grupoAtual.contadores.push({ id: Date.now().toString(), nome, count: 0 });
+        salvar();
+        inp.value = '';
+        renderContadores();
+        atualizarTotal();
+        atualizarPreview();
+        atualizarGrafico();
+        log(`Tipo adicionado: ${nome}`);
+    }
+
+    function renderContadores() {
+        const el = document.getElementById('listaContadores');
+        if (!grupoAtual || !grupoAtual.contadores.length) {
+            el.innerHTML = `<div class="vazio anim"><div class="vazio-icone">🏍️</div><div class="vazio-txt">Nenhum tipo cadastrado.<br>Adicione tipos de veículo acima.<br><small style="opacity:.6">Ex: Motos, Carros, Caminhões</small></div></div>`;
+            return;
+        }
+        el.innerHTML = grupoAtual.contadores.map(c => `
+            <div class="contador-card anim">
+                <div class="contador-header">
+                    <div class="contador-nome">${c.nome}</div>
+                    <button class="btn-del-contador" onclick="excluirContador('${c.id}')">×</button>
+                </div>
+                <div class="contador-num" id="num_${c.id}">${c.count}</div>
+                <div class="contador-btns">
+                    <button class="btn-menos" onclick="decrementar('${c.id}')">−</button>
+                    <button class="btn-mais" onclick="incrementar('${c.id}')">+</button>
+                    <button class="btn-reiniciar" onclick="reiniciar('${c.id}')">↺ Reiniciar</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function incrementar(id) {
+        const c = grupoAtual.contadores.find(x => x.id === id);
+        c.count++;
+        salvar();
+        const el = document.getElementById(`num_${id}`);
+        if (el) {
+            el.textContent = c.count;
+            el.classList.remove('bump');
+            void el.offsetWidth;
+            el.classList.add('bump');
+            setTimeout(() => el.classList.remove('bump'), 150);
+        }
+        atualizarTotal();
+        atualizarPreview();
+        atualizarGrafico();
+        log(`+1 ${c.nome} → ${c.count}`);
+    }
+
+    function decrementar(id) {
+        const c = grupoAtual.contadores.find(x => x.id === id);
+        if (c.count <= 0) return;
+        c.count--;
+        salvar();
+        const el = document.getElementById(`num_${id}`);
+        if (el) el.textContent = c.count;
+        atualizarTotal();
+        atualizarPreview();
+        atualizarGrafico();
+        log(`−1 ${c.nome} → ${c.count}`);
+    }
+
+    function reiniciar(id) {
+        const c = grupoAtual.contadores.find(x => x.id === id);
+        if (!confirm(`Reiniciar "${c.nome}" (estava em ${c.count})?`)) return;
+        const antes = c.count;
+        c.count = 0;
+        salvar();
+        const el = document.getElementById(`num_${id}`);
+        if (el) el.textContent = '0';
+        atualizarTotal();
+        atualizarPreview();
+        atualizarGrafico();
+        log(`Reiniciado: ${c.nome} (era ${antes})`);
+    }
+
+    function excluirContador(id) {
+        const c = grupoAtual.contadores.find(x => x.id === id);
+        if (!confirm(`Excluir contador "${c.nome}"?`)) return;
+        grupoAtual.contadores = grupoAtual.contadores.filter(x => x.id !== id);
+        salvar();
+        renderContadores();
+        atualizarTotal();
+        atualizarPreview();
+        atualizarGrafico();
+        log(`Tipo removido: ${c.nome}`);
+    }
+
+    function atualizarTotal() {
+        if (!grupoAtual) return;
+        const total = grupoAtual.contadores.reduce((s, c) => s + c.count, 0);
+        document.getElementById('totalGeral').textContent = total;
+    }
+
+    // ===== ABAS =====
+    function mudarAba(nome) {
+        document.querySelectorAll('.aba-btn').forEach(b => b.classList.toggle('ativa', b.dataset.aba === nome));
+        document.querySelectorAll('.aba-conteudo').forEach(el => el.classList.remove('ativa'));
+        document.getElementById('aba' + nome.charAt(0).toUpperCase() + nome.slice(1)).classList.add('ativa');
+        if (nome === 'grafico') setTimeout(atualizarGrafico, 80);
+        if (nome === 'compartilhar') atualizarPreview();
+        if (nome === 'historico') renderHistorico();
+    }
+
+    // ===== COMPARTILHAR =====
+    function gerarMensagem() {
+        if (!grupoAtual) return '';
+        const agora = new Date().toLocaleString('pt-BR');
+        const total = grupoAtual.contadores.reduce((s, c) => s + c.count, 0);
+        const linhas = grupoAtual.contadores.map(c => {
+            const pct = total > 0 ? Math.round((c.count / total) * 100) : 0;
+            return `  • ${c.nome}: *${c.count}* (${pct}%)`;
+        }).join('\n');
+        return `🚔 *Relatório de Blitz — AMC Fortaleza*\n📋 *${grupoAtual.nome}*\n🗓 ${agora}\n\n*Contagem por tipo de veículo:*\n${linhas}\n\n📊 *Total geral: ${total} veículos*\n\n_Gerado pelo Contador de Blitz — AMC_`;
+    }
+
+    function atualizarPreview() {
+        const el = document.getElementById('sharePreview');
+        if (!el) return;
+        if (!grupoAtual || !grupoAtual.contadores.length) {
+            el.textContent = 'Adicione contadores para visualizar a mensagem.';
+            return;
+        }
+        el.textContent = gerarMensagem();
+    }
+
+    function enviarWhatsApp() {
+        const msg = gerarMensagem();
+        if (!msg || msg.includes('Adicione')) return;
+        const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+        window.open(url, '_blank');
+        log('Enviado via WhatsApp');
+    }
+
+    // ===== PDF =====
+    function gerarPDF() {
+        if (!grupoAtual || !grupoAtual.contadores.length) {
+            alert('Nenhum contador para exportar!');
+            return;
+        }
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            const W = 210, ml = 20, mr = 190, cw = 170;
+            const agora = new Date();
+
+            // Cabeçalho azul
+            doc.setFillColor(13, 71, 161);
+            doc.rect(0, 0, W, 38, 'F');
+
+            // Barra amarela
+            doc.setFillColor(255, 193, 7);
+            doc.rect(0, 38, W, 3, 'F');
+
+            // Título
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(18);
+            doc.text('RELATÓRIO DE BLITZ', ml, 16);
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Autarquia Municipal de Trânsito e Cidadania — AMC Fortaleza', ml, 24);
+
+            doc.setFontSize(9);
+            doc.text('Contador de Veículos em Campo', ml, 31);
+
+            // Dados da blitz
+            doc.setTextColor(30, 30, 30);
+            let y = 52;
+
+            doc.setFillColor(240, 244, 248);
+            doc.roundedRect(ml, y - 5, cw, 22, 3, 3, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            doc.setTextColor(13, 71, 161);
+            doc.text(grupoAtual.nome, ml + 5, y + 4);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(90, 90, 90);
+            doc.text(`Iniciada em: ${new Date(grupoAtual.criado).toLocaleString('pt-BR')}`, ml + 5, y + 10);
+            doc.text(`Exportado em: ${agora.toLocaleString('pt-BR')}`, ml + 5, y + 15);
+
+            y += 32;
+
+            // Cabeçalho tabela
+            doc.setFillColor(13, 71, 161);
+            doc.rect(ml, y, cw, 9, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text('TIPO DE VEÍCULO', ml + 5, y + 6);
+            doc.text('QTD', ml + 120, y + 6);
+            doc.text('%', ml + 148, y + 6);
+
+            y += 9;
+
+            const total = grupoAtual.contadores.reduce((s, c) => s + c.count, 0);
+            grupoAtual.contadores.forEach((c, i) => {
+                const pct = total > 0 ? ((c.count / total) * 100).toFixed(1) : '0.0';
+                if (i % 2 === 0) {
+                    doc.setFillColor(248, 250, 252);
+                    doc.rect(ml, y, cw, 9, 'F');
                 }
-            });
-            
-            // Tab navigation
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-            });
-            
-            // Enter key handlers
-            if (elements.groupName) elements.groupName.addEventListener('keypress', e => {
-                if (e.key === 'Enter') addGroup();
-            });
-            
-            if (elements.counterName) elements.counterName.addEventListener('keypress', e => {
-                if (e.key === 'Enter') addCounter();
-            });
-        }
-
-        // Funções principais
-        function addGroup() {
-            if (!elements.groupName) return;
-            
-            const name = elements.groupName.value.trim();
-            if (!name) return;
-            
-            const newGroup = {
-                id: Date.now().toString(),
-                name: name,
-                counters: []
-            };
-            
-            groups.push(newGroup);
-            saveGroups();
-            renderGroups();
-            elements.groupName.value = '';
-            
-            logger.log(`Grupo criado: ${name}`);
-        }
-
-        function selectGroup(groupId) {
-            currentGroupId = groupId;
-            const group = groups.find(g => g.id === groupId);
-            if (elements.currentGroup) elements.currentGroup.textContent = group.name;
-            
-            // Mostrar seção de contadores e ocultar grupos
-            if (elements.groupSection) elements.groupSection.classList.add('hidden');
-            if (elements.counterSection) elements.counterSection.classList.remove('hidden');
-            if (elements.tabContainer) elements.tabContainer.classList.remove('hidden');
-            if (elements.backBtn) elements.backBtn.classList.remove('hidden');
-            
-            renderCounters();
-            updateChart();
-            
-            logger.log(`Grupo selecionado: ${group.name}`);
-        }
-
-        function goBack() {
-            if (elements.groupSection) elements.groupSection.classList.remove('hidden');
-            if (elements.counterSection) elements.counterSection.classList.add('hidden');
-            if (elements.tabContainer) elements.tabContainer.classList.add('hidden');
-            if (elements.backBtn) elements.backBtn.classList.add('hidden');
-            currentGroupId = null;
-            
-            logger.log('Voltou à lista de grupos');
-        }
-
-        function deleteGroup(groupId) {
-            const group = groups.find(g => g.id === groupId);
-            if (!confirm(`Excluir grupo "${group.name}" e todos os contadores?`)) return;
-            
-            groups = groups.filter(g => g.id !== groupId);
-            saveGroups();
-            renderGroups();
-            
-            if (currentGroupId === groupId) {
-                goBack();
-            }
-            
-            logger.log(`Grupo excluído: ${group.name}`);
-        }
-
-        function addCounter() {
-            if (!currentGroupId || !elements.counterName) return;
-            
-            const name = elements.counterName.value.trim();
-            if (!name) return;
-            
-            const group = groups.find(g => g.id === currentGroupId);
-            const newCounter = {
-                id: Date.now().toString(),
-                name: name,
-                count: 0
-            };
-            
-            group.counters.push(newCounter);
-            saveGroups();
-            renderCounters();
-            updateChart();
-            elements.counterName.value = '';
-            
-            logger.log(`Contador criado: ${name} no grupo ${group.name}`);
-        }
-
-        function incrementCounter(counterId) {
-            const group = groups.find(g => g.id === currentGroupId);
-            const counter = group.counters.find(c => c.id === counterId);
-            counter.count++;
-            saveGroups();
-            renderCounters();
-            updateChart();
-            
-            logger.log(`+1 em ${counter.name} (Total: ${counter.count})`);
-        }
-
-        function decrementCounter(counterId) {
-            const group = groups.find(g => g.id === currentGroupId);
-            const counter = group.counters.find(c => c.id === counterId);
-            if (counter.count > 0) {
-                counter.count--;
-                saveGroups();
-                renderCounters();
-                updateChart();
-                
-                logger.log(`-1 em ${counter.name} (Total: ${counter.count})`);
-            }
-        }
-
-        function resetCounter(counterId) {
-            const group = groups.find(g => g.id === currentGroupId);
-            const counter = group.counters.find(c => c.id === counterId);
-            
-            if (!confirm(`Reiniciar contador "${counter.name}"?`)) return;
-            
-            const oldCount = counter.count;
-            counter.count = 0;
-            saveGroups();
-            renderCounters();
-            updateChart();
-            
-            logger.log(`Contador ${counter.name} reiniciado (era ${oldCount})`);
-        }
-
-        // Gráficos
-        function updateChart() {
-            const group = groups.find(g => g.id === currentGroupId);
-            if (!group || !group.counters.length) return;
-            
-            const ctx = document.getElementById('counterChart');
-            if (!ctx) return;
-            
-            if (chart) {
-                chart.destroy();
-            }
-            
-            const labels = group.counters.map(c => c.name);
-            const data = group.counters.map(c => c.count);
-            
-            chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Contagem',
-                        data: data,
-                        backgroundColor: 'rgba(33, 150, 243, 0.6)',
-                        borderColor: 'rgba(33, 150, 243, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Navegação por abas
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            const tabBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            const tabContent = document.getElementById(`${tabName}Tab`);
-            
-            if (tabBtn) tabBtn.classList.add('active');
-            if (tabContent) tabContent.classList.add('active');
-            
-            if (tabName === 'charts') {
-                setTimeout(updateChart, 100);
-            }
-        }
-
-        // Exportação
-        function exportData(format) {
-            if (!currentGroupId) return;
-            
-            const group = groups.find(g => g.id === currentGroupId);
-            if (!group.counters.length) {
-                alert('Nenhum contador para exportar!');
-                return;
-            }
-            
-            const exportData = group.counters.map(counter => ({
-                'Item': counter.name,
-                'Quantidade': counter.count
-            }));
-            
-            if (format === 'excel') {
-                exportToExcel(exportData, group.name);
-            } else {
-                exportToPDF(exportData, group.name);
-            }
-            
-            logger.log(`Dados exportados em ${format.toUpperCase()}: ${group.name}`);
-        }
-
-        function exportToExcel(data, groupName) {
-            try {
-                const worksheet = XLSX.utils.json_to_sheet(data);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Contagem');
-                XLSX.writeFile(workbook, `contador_${groupName}_${new Date().toISOString().split('T')[0]}.xlsx`);
-            } catch (error) {
-                alert('Erro ao exportar Excel: ' + error.message);
-            }
-        }
-
-        function exportToPDF(data, groupName) {
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Configurar fonte para português
-                doc.setFont('helvetica');
-                
-                // Título
-                doc.setFontSize(16);
-                doc.text(`Contador Múltiplo - ${groupName}`, 20, 20);
-                
-                // Data
-                doc.setFontSize(10);
-                doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 20, 30);
-                doc.text(`Hora: ${new Date().toLocaleTimeString('pt-BR')}`, 20, 35);
-                
-                // Cabeçalho da tabela
-                doc.setFontSize(12);
-                let y = 50;
-                doc.setFont('helvetica', 'bold');
-                doc.text('Item', 20, y);
-                doc.text('Quantidade', 120, y);
-                
-                // Linha separadora
-                doc.line(20, y + 2, 190, y + 2);
-                
-                // Dados
+                doc.setTextColor(30, 30, 30);
                 doc.setFont('helvetica', 'normal');
-                data.forEach((item, index) => {
-                    y += 10;
-                    // Quebra de página se necessário
-                    if (y > 270) {
-                        doc.addPage();
-                        y = 20;
-                    }
-                    
-                    // Truncar texto longo para caber na página
-                    const itemText = item.Item.length > 30 ? item.Item.substring(0, 27) + '...' : item.Item;
-                    doc.text(itemText, 20, y);
-                    doc.text(item.Quantidade.toString(), 120, y);
-                });
-                
-                // Total
-                y += 15;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
-                }
-                doc.line(20, y, 190, y);
-                y += 10;
+                doc.setFontSize(10);
+                doc.text(c.nome, ml + 5, y + 6);
                 doc.setFont('helvetica', 'bold');
-                const total = data.reduce((sum, item) => sum + item.Quantidade, 0);
-                doc.text('TOTAL GERAL:', 20, y);
-                doc.text(total.toString(), 120, y);
-                
-                // Salvar com nome mais limpo
-                const fileName = `contador_${groupName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-                doc.save(fileName);
-            } catch (error) {
-                alert('Erro ao exportar PDF: ' + error.message);
+                doc.text(c.count.toString(), ml + 120, y + 6);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text(pct + '%', ml + 148, y + 6);
+                y += 9;
+                if (y > 270) { doc.addPage(); y = 20; }
+            });
+
+            // Linha total
+            doc.setFillColor(255, 193, 7);
+            doc.rect(ml, y, cw, 1, 'F');
+            y += 5;
+            doc.setFillColor(13, 71, 161);
+            doc.rect(ml, y, cw, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text('TOTAL GERAL', ml + 5, y + 7);
+            doc.text(total.toString(), ml + 120, y + 7);
+            doc.text('100%', ml + 145, y + 7);
+
+            // Rodapé
+            y += 22;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(130, 130, 130);
+            doc.text('AMC Fortaleza · NULOG — Núcleo de Logística · (85) 8166-7049 · amctransito.com.br', ml, y);
+
+            const nome = `blitz_${grupoAtual.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${agora.toISOString().split('T')[0]}.pdf`;
+            doc.save(nome);
+            log('PDF gerado');
+        } catch (e) {
+            alert('Erro ao gerar PDF: ' + e.message);
+        }
+    }
+
+    // ===== HISTÓRICO =====
+    function log(msg) {
+        historico.unshift({ msg, ts: new Date().toISOString() });
+        if (historico.length > 100) historico = historico.slice(0, 100);
+        localStorage.setItem('blitz_hist', JSON.stringify(historico));
+        renderHistorico();
+    }
+
+    function renderHistorico() {
+        const el = document.getElementById('listaHistorico');
+        if (!el) return;
+        if (!historico.length) {
+            el.innerHTML = '<div class="vazio" style="padding:20px 0">Nenhuma ação registrada.</div>';
+            return;
+        }
+        el.innerHTML = historico.map(h => `
+            <div class="hist-item">
+                <div>${h.msg}</div>
+                <div class="hist-hora">${new Date(h.ts).toLocaleString('pt-BR')}</div>
+            </div>`).join('');
+    }
+
+    function limparHistorico() {
+        if (!confirm('Limpar todo o histórico?')) return;
+        historico = [];
+        localStorage.setItem('blitz_hist', '[]');
+        renderHistorico();
+    }
+
+    // ===== GRÁFICO =====
+    function atualizarGrafico() {
+        const canvas = document.getElementById('grafico');
+        if (!canvas || !grupoAtual) return;
+
+        const semDados = !grupoAtual.contadores.length || grupoAtual.contadores.every(c => c.count === 0);
+        const wrap = document.querySelector('.chart-wrap');
+
+        if (semDados) {
+            if (wrap) wrap.innerHTML = '<div class="grafico-vazio">Sem dados para exibir ainda.<br>Comece a contar!</div>';
+            if (graficoObj) { graficoObj.destroy(); graficoObj = null; }
+            return;
+        }
+
+        if (wrap && !wrap.querySelector('canvas')) {
+            wrap.innerHTML = '<canvas id="grafico"></canvas>';
+        }
+
+        const ctx = document.getElementById('grafico');
+        if (!ctx) return;
+
+        if (graficoObj) { graficoObj.destroy(); graficoObj = null; }
+
+        const isDark = !temaClaro;
+        const labels = grupoAtual.contadores.map(c => c.nome);
+        const data = grupoAtual.contadores.map(c => c.count);
+        const cores = ['#1565C0','#2E7D32','#C62828','#E65100','#4A148C','#006064','#558B2F','#37474F'];
+
+        graficoObj = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    backgroundColor: labels.map((_, i) => cores[i % cores.length] + 'CC'),
+                    borderColor: labels.map((_, i) => cores[i % cores.length]),
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        ticks: { color: isDark ? '#8FA6B8' : '#5A7A95', font: { family: 'Barlow', weight: '600' } },
+                        grid: { color: isDark ? '#2A3F52' : '#D0DBE6' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: isDark ? '#8FA6B8' : '#5A7A95' },
+                        grid: { color: isDark ? '#2A3F52' : '#D0DBE6' }
+                    }
+                }
             }
-        }
+        });
+    }
 
-        function saveGroups() {
-            localStorage.setItem('counterGroups', JSON.stringify(groups));
-        }
+    // ===== SAVE =====
+    function salvar() {
+        localStorage.setItem('blitz_grupos', JSON.stringify(grupos));
+    }
 
-        // Inicializar quando carregado
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+    renderHistorico();
+</script>
 </body>
 </html>
