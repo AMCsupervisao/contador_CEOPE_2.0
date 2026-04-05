@@ -478,28 +478,6 @@
         }
         .btn-pdf:active { background: var(--vm2); }
 
-        /* HISTÓRICO */
-        .hist-item {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--borda);
-            font-size: 13.5px;
-        }
-        .hist-item:last-child { border-bottom: none; }
-        .hist-hora { font-size: 11.5px; color: var(--txt2); margin-top: 2px; }
-        .btn-limpar {
-            background: transparent;
-            border: 1px solid var(--borda);
-            color: var(--txt2);
-            border-radius: 8px;
-            padding: 9px 16px;
-            font-family: var(--fb);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 14px;
-            width: 100%;
-        }
-
         /* GRÁFICO */
         .chart-wrap {
             position: relative;
@@ -599,7 +577,6 @@
     <div class="abas" id="abas">
         <div class="abas-nav">
             <button class="aba-btn ativa" data-aba="compartilhar" onclick="mudarAba('compartilhar')">Compartilhar</button>
-            <button class="aba-btn" data-aba="historico" onclick="mudarAba('historico')">Histórico</button>
             <button class="aba-btn" data-aba="grafico" onclick="mudarAba('grafico')">Gráfico</button>
         </div>
 
@@ -619,12 +596,6 @@
             </div>
         </div>
 
-        <!-- ABA HISTÓRICO -->
-        <div class="aba-conteudo" id="abaHistorico">
-            <div id="listaHistorico"></div>
-            <button class="btn-limpar" onclick="limparHistorico()">Limpar histórico</button>
-        </div>
-
         <!-- ABA GRÁFICO -->
         <div class="aba-conteudo" id="abaGrafico">
             <div class="chart-wrap">
@@ -641,7 +612,6 @@
     let grupos = JSON.parse(localStorage.getItem('blitz_grupos') || '[]');
     let grupoAtual = null;
     let graficoObj = null;
-    let historico = JSON.parse(localStorage.getItem('blitz_hist') || '[]');
     let temaClaro = localStorage.getItem('blitz_tema') === 'claro';
 
     // ===== INIT =====
@@ -672,7 +642,6 @@
         salvar();
         inp.value = '';
         renderGrupos();
-        log(`Blitz criada: ${nome}`);
     }
 
     function renderGrupos() {
@@ -706,7 +675,6 @@
         grupos = grupos.filter(x => x.id !== id);
         salvar();
         renderGrupos();
-        log(`Blitz excluída: ${g.nome}`);
     }
 
     function abrirGrupo(id) {
@@ -721,7 +689,6 @@
         renderContadores();
         atualizarTotal();
         atualizarPreview();
-        log(`Blitz aberta: ${grupoAtual.nome}`);
     }
 
     function voltarGrupos() {
@@ -747,7 +714,6 @@
         atualizarTotal();
         atualizarPreview();
         atualizarGrafico();
-        log(`Tipo adicionado: ${nome}`);
     }
 
     function renderContadores() {
@@ -786,7 +752,6 @@
         atualizarTotal();
         atualizarPreview();
         atualizarGrafico();
-        log(`+1 ${c.nome} → ${c.count}`);
     }
 
     function decrementar(id) {
@@ -799,7 +764,6 @@
         atualizarTotal();
         atualizarPreview();
         atualizarGrafico();
-        log(`−1 ${c.nome} → ${c.count}`);
     }
 
     function reiniciar(id) {
@@ -813,7 +777,6 @@
         atualizarTotal();
         atualizarPreview();
         atualizarGrafico();
-        log(`Reiniciado: ${c.nome} (era ${antes})`);
     }
 
     function excluirContador(id) {
@@ -825,7 +788,6 @@
         atualizarTotal();
         atualizarPreview();
         atualizarGrafico();
-        log(`Tipo removido: ${c.nome}`);
     }
 
     function atualizarTotal() {
@@ -841,7 +803,6 @@
         document.getElementById('aba' + nome.charAt(0).toUpperCase() + nome.slice(1)).classList.add('ativa');
         if (nome === 'grafico') setTimeout(atualizarGrafico, 80);
         if (nome === 'compartilhar') atualizarPreview();
-        if (nome === 'historico') renderHistorico();
     }
 
     // ===== COMPARTILHAR =====
@@ -871,7 +832,6 @@
         if (!msg || msg.includes('Adicione')) return;
         const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
         window.open(url, '_blank');
-        log('Enviado via WhatsApp');
     }
 
     // ===== PDF =====
@@ -980,61 +940,32 @@
 
             const nome = `blitz_${grupoAtual.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${agora.toISOString().split('T')[0]}.pdf`;
             doc.save(nome);
-            log('PDF gerado');
         } catch (e) {
             alert('Erro ao gerar PDF: ' + e.message);
         }
     }
 
-    // ===== HISTÓRICO =====
-    function log(msg) {
-        historico.unshift({ msg, ts: new Date().toISOString() });
-        if (historico.length > 100) historico = historico.slice(0, 100);
-        localStorage.setItem('blitz_hist', JSON.stringify(historico));
-        renderHistorico();
-    }
-
-    function renderHistorico() {
-        const el = document.getElementById('listaHistorico');
-        if (!el) return;
-        if (!historico.length) {
-            el.innerHTML = '<div class="vazio" style="padding:20px 0">Nenhuma ação registrada.</div>';
-            return;
-        }
-        el.innerHTML = historico.map(h => `
-            <div class="hist-item">
-                <div>${h.msg}</div>
-                <div class="hist-hora">${new Date(h.ts).toLocaleString('pt-BR')}</div>
-            </div>`).join('');
-    }
-
-    function limparHistorico() {
-        if (!confirm('Limpar todo o histórico?')) return;
-        historico = [];
-        localStorage.setItem('blitz_hist', '[]');
-        renderHistorico();
-    }
-
     // ===== GRÁFICO =====
     function atualizarGrafico() {
-        const canvas = document.getElementById('grafico');
-        if (!canvas || !grupoAtual) return;
+        if (!grupoAtual) return;
+
+        const wrap = document.querySelector('.chart-wrap');
+        if (!wrap) return;
 
         const semDados = !grupoAtual.contadores.length || grupoAtual.contadores.every(c => c.count === 0);
-        const wrap = document.querySelector('.chart-wrap');
 
         if (semDados) {
-            if (wrap) wrap.innerHTML = '<div class="grafico-vazio">Sem dados para exibir ainda.<br>Comece a contar!</div>';
             if (graficoObj) { graficoObj.destroy(); graficoObj = null; }
+            wrap.innerHTML = '<div class="grafico-vazio">Sem dados para exibir ainda.<br>Comece a contar!</div>';
             return;
         }
 
-        if (wrap && !wrap.querySelector('canvas')) {
+        // Garante que o canvas está no DOM
+        if (!wrap.querySelector('canvas')) {
             wrap.innerHTML = '<canvas id="grafico"></canvas>';
         }
 
-        const ctx = document.getElementById('grafico');
-        if (!ctx) return;
+        const ctx = document.getElementById('grafico').getContext('2d');
 
         if (graficoObj) { graficoObj.destroy(); graficoObj = null; }
 
@@ -1074,12 +1005,10 @@
         });
     }
 
-    // ===== SAVE =====
     function salvar() {
         localStorage.setItem('blitz_grupos', JSON.stringify(grupos));
     }
 
-    renderHistorico();
 </script>
 </body>
 </html>
